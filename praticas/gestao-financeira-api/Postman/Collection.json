@@ -1,0 +1,211 @@
+{
+  "info": {
+    "_postman_id": "ae1266cf-9098-4276-9c81-9f8c56432ddf",
+    "name": "Gestao-Financeira-API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54888346",
+    "_collection_link": "https://go.postman.co/collection/54888346-ae1266cf-9098-4276-9c81-9f8c56432ddf?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Health-check",
+      "request": {
+        "method": "GET",
+        "url":    "{{baseUrl}}/",
+        "description": "Verifica se o servidor está no ar.\nResposta esperada: { \"ok\": true, \"name\": \"gestao-financeira-api\" }"
+      }
+    },
+    {
+      "name": "Auth Register",
+      "request": {
+        "method": "POST",
+        "url":    "{{baseUrl}}/auth/register",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Meu Nome\",\n  \"email\": \"meu@email.com\",\n  \"password\": \"minhasenha\"\n}"
+        },
+        "description": "Cria um novo usuário. Retorna 201 com os dados (sem a senha)."
+      }
+    },
+    {
+      "name": "Auth Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "if (json.token) {",
+              "  pm.collectionVariables.set('token', json.token);",
+              "  console.log('Token salvo:', json.token.slice(0,20) + '...');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url":    "{{baseUrl}}/auth/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"Heitor@gestao.com\",\n  \"password\": \"Heitor123\"\n}"
+        },
+        "description": "Autentica o usuário. O script de teste salva automaticamente o JWT na variável `token`.\nResposta: { token, user: { id, name, email } }"
+      }
+    },
+    {
+      "name": "Categorias - Listar",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const cats = pm.response.json();",
+              "const income = cats.find(c => c.name === 'income');",
+              "if (income) pm.collectionVariables.set('categoryId', income.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url":    "{{baseUrl}}/categories",
+        "description": "Lista todas as categorias ordenadas por displayName.\nO script de teste salva automaticamente o id da categoria 'income' em `categoryId`."
+      }
+    },
+    {
+      "name": "Categorias - Criar",
+      "request": {
+        "method": "POST",
+        "url":    "{{baseUrl}}/categories",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"health\",\n  \"displayName\": \"Saúde\",\n  \"icon\": \"favorite\",\n  \"background\": \"#FFB6B6\",\n  \"isIncome\": false\n}"
+        },
+        "description": "Cria uma nova categoria.\nResposta esperada: 201 Created com o objeto criado (incluindo o id gerado)."
+      }
+    },
+    {
+      "name": "Categorias - Atualizar",
+      "request": {
+        "method": "PUT",
+        "url":    "{{baseUrl}}/categories/id",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"displayName\": \"Saúde e Bem-estar\"\n}"
+        },
+        "description": "Atualiza parcialmente uma categoria existente."
+      }
+    },
+    {
+      "name": "Categorias - Excluir",
+      "request": {
+        "method": "DELETE",
+        "url":    "{{baseUrl}}/categories/id",
+        "description": "Tenta excluir a categoria padrão 'income'.\nResposta esperada: 400 com { \"error\": \"Categorias padrão não podem ser excluídas\" }"
+      }
+    },
+    { 
+      "name": "Transações - Criar",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const tx = pm.response.json();",
+              "if (tx.id) pm.collectionVariables.set('transactionId', tx.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url":    "{{baseUrl}}/transactions",
+        "header": [
+          { "key": "Content-Type",  "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Salário de outubro\",\n  \"value\": 3500.50,\n  \"date\": \"2026-04-29\",\n  \"categoryId\": \"{{categoryId}}\"\n}"
+        },
+        "description": "Cria uma nova transação para o usuário autenticado.\nRequer: Authorization: Bearer {{token}}\nResposta esperada: 201 Created com a categoria aninhada.\nO script de teste salva o id em `transactionId`."
+      }
+    },
+    {
+      "name": "Transações - Listar",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/transactions?month=4&year=2026",
+          "host": ["{{baseUrl}}"],
+          "path": ["transactions"],
+          "query": [
+            { "key": "month", "value": "4",    "description": "Mês (1–12). Omitir para listar todos." },
+            { "key": "year",  "value": "2026", "description": "Ano. Omitir para listar todos." }
+          ]
+        },
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "description": "Lista transações do usuário autenticado.\nParâmetros opcionais: ?month=4&year=2026 para filtrar por mês/ano.\nResposta: array com a categoria expandida em cada item."
+      }
+    },
+    {
+      "name": "Transações - Atualizar",
+      "request": {
+        "method": "PUT",
+        "url":    "{{baseUrl}}/transactions/id",
+        "header": [
+          { "key": "Content-Type",  "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Salário de outubro (corrigido)\",\n  \"value\": 3800.00\n}"
+        },
+        "description": "Atualiza parcialmente uma transação do usuário autenticado.\nResposta: transação atualizada com categoria aninhada."
+      }
+    },
+    {
+      "name": "Transações - Excluir",
+      "request": {
+        "method": "DELETE",
+        "url":    "{{baseUrl}}/transactions/id",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "description": "Exclui uma transação.\nResposta esperada: 204 No Content."
+      }
+    },
+    {
+      "name": "Validação de erros",
+      "request": {
+        "method": "POST",
+        "url":    "{{baseUrl}}/transactions",
+        "header": [
+          { "key": "Content-Type",  "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"description\": \"\" }"
+        },
+        "description": "Envia corpo inválido para testar a validação Zod.\nResposta esperada: 400 com { \"error\": \"Dados inválidos\", \"details\": [...] }"
+      }
+    },
+    {
+      "name": "Credenciais inválidas",
+      "request": {
+        "method": "POST",
+        "url":    "{{baseUrl}}/auth/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"Heitor@gestao.com\",\n  \"password\": \"senhaerrada\"\n}"
+        },
+        "description": "Testa login com senha incorreta.\nResposta esperada: 401 com { \"error\": \"Credenciais inválidas\" }"
+      }
+    }
+  ]
+}
