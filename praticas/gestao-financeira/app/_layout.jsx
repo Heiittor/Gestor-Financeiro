@@ -1,3 +1,4 @@
+// Root Layout — layout raiz do app (login, tabs, not-found)
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { colors } from "../constants/colors";
