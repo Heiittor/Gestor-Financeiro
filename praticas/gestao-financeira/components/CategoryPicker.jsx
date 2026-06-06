@@ -24,9 +24,15 @@ export default function CategoryPicker({ form, setForm, categories }) {
             setForm({ ...form, categoryId: itemValue })
           }
         >
-          {categories.map((c) => (
-            <Picker.Item key={c.id} label={c.displayName} value={c.id} />
-          ))}
+         {categories.map((c) => (
+         <Picker.Item 
+          key={c.id} 
+          label={c.displayName} 
+          value={c.id}
+          color="#333333"
+        />
+        ))}
+        
         </Picker>
       </View>
     </View>

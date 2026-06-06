@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import categoriesRouter from "./routes/categories.js";
 import transactionsRouter from "./routes/transactions.js";
+import authRouter from "./routes/auth.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.get("/", (req, res) => res.json({ ok: true, name: "gestao-financeira-api" }));
 
+app.use("/auth", authRouter);
 app.use("/categories", categoriesRouter);
 app.use("/transactions", transactionsRouter);
 

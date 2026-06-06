@@ -1,3 +1,4 @@
+// Tabs Layout — layout das abas de navegação
 import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -48,11 +49,7 @@ export default function TabsLayout() {
           tabBarLabel: "",
           tabBarIcon: () => (
             <View style={styles.addButton}>
-              <MaterialIcons
-                name="add"
-                size={40}
-                color={colors.primaryContrast}
-              />
+              <MaterialIcons name="add" size={40} color={colors.primaryContrast} />
             </View>
           ),
         }}
