@@ -8,7 +8,6 @@ import { authMiddleware } from "../middlewares/auth.js";
 
 const router = Router();
 
-// GET /transactions
 router.get("/", authMiddleware, async (req, res, next) => {
   try {
     const transactions = await prisma.transaction.findMany({
@@ -20,7 +19,6 @@ router.get("/", authMiddleware, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// POST /transactions
 router.post("/", authMiddleware, async (req, res, next) => {
   try {
     const data = createTransactionSchema.parse(req.body);
@@ -32,7 +30,6 @@ router.post("/", authMiddleware, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// PUT /transactions/:id
 router.put("/:id", authMiddleware, async (req, res, next) => {
   try {
     const data = updateTransactionSchema.parse(req.body);
@@ -45,7 +42,6 @@ router.put("/:id", authMiddleware, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// DELETE /transactions/:id
 router.delete("/:id", authMiddleware, async (req, res, next) => {
   try {
     await prisma.transaction.delete({ where: { id: req.params.id } });
