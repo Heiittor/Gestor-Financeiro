@@ -97,7 +97,7 @@ export default function AddTransactions() {
     <KeyboardAvoidingView style={globalStyles.screenContainer}>
       <ScrollView 
         style={globalStyles.content}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         onScrollBeginDrag={Keyboard.dismiss}
       >
         <View style={styles.form}>
